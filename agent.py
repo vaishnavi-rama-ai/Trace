@@ -86,7 +86,7 @@ graph = graph_builder.compile()
 # Store conversation state per session
 conversation_states = {}
 
-@traceable(run_type="agent")
+@traceable(name="agent")
 def process_chat(user_message: str, session_id: str) -> tuple[str, dict]:
     """Process a chat message through the agent with LangSmith tracing."""
     # Initialize or get existing conversation state
