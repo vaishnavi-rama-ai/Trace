@@ -8,8 +8,13 @@ import {
   MenuItem,
   Typography,
   Link,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import TraceLogo from '../components/TraceLogo';
+import { COMMON_BUTTON_STYLES, COMMON_INPUT_STYLES, COMMON_TYPOGRAPHY, COMMON_CONTAINER_STYLES } from '../theme/commonStyles';
+
+const API_URL = 'http://localhost:3001';
 
 const languages = [
   { value: 'en', label: 'English' },
@@ -33,6 +38,8 @@ const RegisterScreen = ({ onRegister, onNavigateToLogin }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,13 +54,14 @@ const RegisterScreen = ({ onRegister, onNavigateToLogin }) => {
         [name]: '',
       }));
     }
+    setGeneralError('');
   };
 
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = 'Username is required';
     }
 
     if (!formData.email.trim()) {
@@ -78,11 +86,51 @@ const RegisterScreen = ({ onRegister, onNavigateToLogin }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log('Form submitted:', formData);
-      onRegister();
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setGeneralError('');
+
+    try {
+      console.log('Attempting to register with API URL:', API_URL);
+      
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.name.trim().replace(/\s+/g, '_').toLowerCase(),
+          email: formData.email,
+          password: formData.password,
+          full_name: formData.name,
+          language: formData.language,
+        }),
+      });
+
+      console.log('Response status:', response.status);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Registration error:', data);
+        setGeneralError(data.detail || 'Registration failed');
+        return;
+      }
+
+      // Save token and user info to localStorage
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      onRegister(data.user, data.access_token);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('Registration error:', errorMsg, error);
+      setGeneralError(`Network error: ${errorMsg}. Make sure backend is running on ${API_URL}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,159 +148,39 @@ const RegisterScreen = ({ onRegister, onNavigateToLogin }) => {
       <Container maxWidth="sm">
         <Box
           sx={{
-            bgcolor: 'primary.main',
+            ...COMMON_CONTAINER_STYLES.authCard,
             padding: { xs: '30px 25px', sm: '40px 50px' },
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
           }}
         >
           <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Box
-              component="h1"
-              sx={{
-                fontSize: { xs: '32px', sm: '40px' },
-                fontFamily: 'Georgia, serif',
-                m: '0 0 10px 0',
-                color: 'text.primary',
-                fontWeight: 400,
-              }}
-            >
+            <Box component="h1" sx={COMMON_TYPOGRAPHY.smallHeading}>
               Join Trace
             </Box>
-            <TraceLogo size={50} rotate={true} />
+            <TraceLogo size={90} />
           </Box>
 
+          {generalError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {generalError}
+            </Alert>
+          )}
+
           <Box component="form" onSubmit={handleSubmit} noValidate>
-            <TextField
-              fullWidth
-              name="name"
-              label="Name"
-              value={formData.name}
-              onChange={handleChange}
-              error={!!errors.name}
-              helperText={errors.name}
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: 'white',
-                  '& fieldset': {
-                    borderColor: errors.name ? 'error.main' : '#000000',
-                    borderWidth: '2px',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: errors.name ? 'error.main' : '#000000',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: errors.name ? 'error.main' : '#000000',
-                  },
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'text.primary',
-                  '&.Mui-focused': {
-                    color: 'text.primary',
-                  },
-                },
-              }}
-            />
-
-            <TextField
-              fullWidth
-              name="email"
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={!!errors.email}
-              helperText={errors.email}
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: 'white',
-                  '& fieldset': {
-                    borderColor: errors.email ? 'error.main' : '#000000',
-                    borderWidth: '2px',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: errors.email ? 'error.main' : '#000000',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: errors.email ? 'error.main' : '#000000',
-                  },
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'text.primary',
-                  '&.Mui-focused': {
-                    color: 'text.primary',
-                  },
-                },
-              }}
-            />
-
-            <TextField
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              error={!!errors.password}
-              helperText={errors.password}
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: 'white',
-                  '& fieldset': {
-                    borderColor: errors.password ? 'error.main' : '#000000',
-                    borderWidth: '2px',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: errors.password ? 'error.main' : '#000000',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: errors.password ? 'error.main' : '#000000',
-                  },
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'text.primary',
-                  '&.Mui-focused': {
-                    color: 'text.primary',
-                  },
-                },
-              }}
-            />
-
-            <TextField
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: 'white',
-                  '& fieldset': {
-                    borderColor: errors.confirmPassword ? 'error.main' : '#000000',
-                    borderWidth: '2px',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: errors.confirmPassword ? 'error.main' : '#000000',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: errors.confirmPassword ? 'error.main' : '#000000',
-                  },
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'text.primary',
-                  '&.Mui-focused': {
-                    color: 'text.primary',
-                  },
-                },
-              }}
-            />
+            {['name', 'email', 'password', 'confirmPassword'].map((fieldName) => (
+              <TextField
+                key={fieldName}
+                fullWidth
+                name={fieldName}
+                label={fieldName === 'confirmPassword' ? 'Confirm Password' : fieldName === 'name' ? 'Username' : fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}
+                type={fieldName === 'email' ? 'email' : fieldName.includes('password') ? 'password' : 'text'}
+                value={formData[fieldName]}
+                onChange={handleChange}
+                disabled={loading}
+                error={!!errors[fieldName]}
+                helperText={errors[fieldName]}
+                sx={{ ...COMMON_INPUT_STYLES.textFieldWithError(!!errors[fieldName]), mb: 2 }}
+              />
+            ))}
 
             <TextField
               fullWidth
@@ -261,28 +189,8 @@ const RegisterScreen = ({ onRegister, onNavigateToLogin }) => {
               label="Language"
               value={formData.language}
               onChange={handleChange}
-              sx={{
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: 'white',
-                  '& fieldset': {
-                    borderColor: '#000000',
-                    borderWidth: '2px',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#000000',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#000000',
-                  },
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'text.primary',
-                  '&.Mui-focused': {
-                    color: 'text.primary',
-                  },
-                },
-              }}
+              disabled={loading}
+              sx={{ ...COMMON_INPUT_STYLES.textField, mb: 3 }}
             >
               {languages.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
@@ -295,21 +203,10 @@ const RegisterScreen = ({ onRegister, onNavigateToLogin }) => {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{
-                bgcolor: 'white',
-                color: 'text.primary',
-                border: '2px solid #000000',
-                padding: '12px 32px',
-                fontSize: '16px',
-                borderRadius: '4px',
-                mb: 2,
-                fontWeight: 500,
-                '&:hover': {
-                  bgcolor: '#f5f5f5',
-                },
-              }}
+              disabled={loading}
+              sx={{ ...COMMON_BUTTON_STYLES.whiteBordered, mb: 2 }}
             >
-              Create Account
+              {loading ? <CircularProgress size={20} /> : 'Create Account'}
             </Button>
 
             <Typography
@@ -324,11 +221,12 @@ const RegisterScreen = ({ onRegister, onNavigateToLogin }) => {
                 component="button"
                 type="button"
                 onClick={onNavigateToLogin}
+                disabled={loading}
                 sx={{
                   color: '#000000',
                   fontWeight: 600,
                   textDecorationColor: '#000000',
-                  cursor: 'pointer',
+                  cursor: loading ? 'not-allowed' : 'pointer',
                 }}
               >
                 Login

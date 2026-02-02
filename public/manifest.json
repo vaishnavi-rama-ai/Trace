@@ -1,0 +1,9 @@
+{
+  "short_name": "Trace",
+  "name": "Trace - Journaling Companion",
+  "icons": [],
+  "start_url": "./",
+  "display": "standalone",
+  "theme_color": "#FA9D84",
+  "background_color": "#F5F0E8"
+}

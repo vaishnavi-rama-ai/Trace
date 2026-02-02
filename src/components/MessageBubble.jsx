@@ -2,9 +2,29 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import TraceLogo from './TraceLogo';
+import LoadingDots from './LoadingDots';
 
 const MessageBubble = ({ message }) => {
   const isTrace = message.sender === 'trace';
+
+  // For loading state, show logo with dots to the right
+  if (message.text === 'loading') {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          gap: 1.5,
+          alignItems: 'center',
+        }}
+      >
+        <Box sx={{ flexShrink: 0 }}>
+          <TraceLogo size={120} />
+        </Box>
+        <LoadingDots size="large" color="secondary" />
+      </Box>
+    );
+  }
 
   return (
     <Box

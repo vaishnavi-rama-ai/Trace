@@ -1,19 +1,14 @@
 // screens/HomeScreen.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Container, Paper, Typography, IconButton } from '@mui/material';
 import { MessageCircle, Flame, MapPin, LogOut } from 'lucide-react';
 import TraceLogo from '../components/TraceLogo';
 import HomeActionCard from '../components/HomeActionCard';
+import { COMMON_TYPOGRAPHY, COMMON_CONTAINER_STYLES } from '../theme/commonStyles';
 
-const HomeScreen = ({ onLogout, onNavigateToChat }) => {
-  const handleBurnJournal = () => {
-    console.log('Burn Journal clicked');
-    // Add your burn journal logic here
-  };
-
+const HomeScreen = ({ onLogout, onNavigateToChat, onNavigateToBurn, onNavigateToAnalysis }) => {
   const handleTraceMe = () => {
-    console.log('Trace Me clicked');
-    // Add your trace me logic here
+    onNavigateToAnalysis();
   };
 
   return (
@@ -28,25 +23,15 @@ const HomeScreen = ({ onLogout, onNavigateToChat }) => {
       {/* Header */}
       <Box
         sx={{
-          bgcolor: 'primary.main',
+          ...COMMON_CONTAINER_STYLES.header,
           padding: 2,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         }}
       >
         <Container maxWidth="md">
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <TraceLogo size={40} />
-              <Typography
-                variant="h1"
-                sx={{
-                  fontSize: '28px',
-                  fontFamily: 'Georgia, serif',
-                  m: 0,
-                  color: 'text.primary',
-                  fontWeight: 400,
-                }}
-              >
+              <Typography variant="h1" sx={COMMON_TYPOGRAPHY.navTitle}>
                 Trace
               </Typography>
             </Box>
@@ -92,13 +77,13 @@ const HomeScreen = ({ onLogout, onNavigateToChat }) => {
         >
           <HomeActionCard
             icon={<MessageCircle size={40} />}
-            title="Chat with Trace"
+            title="Journal with Trace"
             onClick={onNavigateToChat}
           />
           <HomeActionCard
             icon={<Flame size={40} />}
             title="Burn Journal"
-            onClick={handleBurnJournal}
+            onClick={onNavigateToBurn}
           />
           <HomeActionCard
             icon={<MapPin size={40} />}

@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: trace-postgres
+    environment:
+      POSTGRES_USER: trace_user
+      POSTGRES_PASSWORD: trace_password_secure
+      POSTGRES_DB: trace_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trace_user -d trace_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trace-network
+
+  # Backend Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: trace-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://trace_user:trace_password_secure@db:5432/trace_db
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+    networks:
+      - trace-network
+    restart: unless-stopped
+
+  # Frontend Service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: trace-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:3001
+    networks:
+      - trace-network
+    restart: unless-stopped
+
+  # Sentiment Analysis Training Service
+  sentiment-trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: trace-sentiment-trainer
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://trace_user:trace_password_secure@db:5432/trace_db
+      PYTHONUNBUFFERED: 1
+      DATA_PATH: ./data.csv
+      MODEL_DIR: ./sentiment_model_tf
+    volumes:
+      - .:/app
+      - ./sentiment_model_tf:/app/sentiment_model_tf
+    networks:
+      - trace-network
+    command: python -c "from sentiment_service import train_sentiment_model; train_sentiment_model()"
+    profiles:
+      - training
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  trace-network:
+    driver: bridge

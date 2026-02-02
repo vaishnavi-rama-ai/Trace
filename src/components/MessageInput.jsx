@@ -1,9 +1,10 @@
 // components/MessageInput.jsx
 import React, { useState } from 'react';
 import { Box, TextField, IconButton, Paper } from '@mui/material';
-import { Send } from 'lucide-react';
+import { Send, Plus } from 'lucide-react';
+import { COMMON_BUTTON_STYLES } from '../theme/commonStyles';
 
-const MessageInput = ({ onSendMessage, isLoading = false }) => {
+const MessageInput = ({ onSendMessage, isLoading, onNewChat }) => {
   const [inputMessage, setInputMessage] = useState('');
 
   const handleSubmit = (e) => {
@@ -36,15 +37,18 @@ const MessageInput = ({ onSendMessage, isLoading = false }) => {
       >
         <TextField
           fullWidth
+          multiline
+          maxRows={4}
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           placeholder="Share your thoughts with Trace..."
-          variant="outlined"
           disabled={isLoading}
+          variant="outlined"
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: '24px',
               bgcolor: 'background.default',
+              padding: '8px 12px',
               '& fieldset': {
                 borderColor: 'primary.main',
                 borderWidth: '2px',
@@ -56,24 +60,44 @@ const MessageInput = ({ onSendMessage, isLoading = false }) => {
                 borderColor: 'primary.main',
               },
             },
+            '& .MuiOutlinedInput-input': {
+              maxHeight: '120px',
+              overflowY: 'auto',
+              fontSize: '16px',
+              lineHeight: 1.5,
+            },
           }}
         />
+        {onNewChat && (
+          <IconButton
+            onClick={onNewChat}
+            sx={{
+              ...COMMON_BUTTON_STYLES.iconButton,
+              bgcolor: 'primary.main',
+              color: 'text.primary',
+              '&:hover': {
+                bgcolor: '#F58A6E',
+                transform: 'scale(1.05)',
+              },
+            }}
+          >
+            <Plus size={20} />
+          </IconButton>
+        )}
         <IconButton
           type="submit"
           disabled={isLoading || !inputMessage.trim()}
           sx={{
+            ...COMMON_BUTTON_STYLES.iconButton,
             bgcolor: 'secondary.main',
             color: 'white',
-            width: '48px',
-            height: '48px',
             '&:hover': {
               bgcolor: 'secondary.main',
-              transform: isLoading ? 'scale(1)' : 'scale(1.05)',
+              transform: 'scale(1.05)',
             },
-            transition: 'transform 0.2s',
-            '&:disabled': {
-              bgcolor: '#ccc',
-              color: '#999',
+            '&.Mui-disabled': {
+              bgcolor: '#CCCCCC',
+              color: '#666666',
             },
           }}
         >

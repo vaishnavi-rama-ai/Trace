@@ -12,7 +12,7 @@ const MessageList = ({ messages }) => {
         padding: 3,
         display: 'flex',
         flexDirection: 'column',
-        gap: 2,
+        gap: 1,
       }}
     >
       {messages.map((message) => (

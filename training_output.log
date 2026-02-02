@@ -1,0 +1,52 @@
+#1 [internal] load build definition from Dockerfile.backend
+#1 transferring dockerfile: 40B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load .dockerignore
+#2 transferring context: 35B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 1.1s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [stage-0 1/8] FROM docker.io/library/python:3.12-slim@sha256:5e2dbd4bbdd9c0e67412aea9463906f74a22c60f89eb7b5bbb7d45b66a2b68a6
+#5 DONE 0.0s
+
+#6 FROM ghcr.io/astral-sh/uv:latest
+#6 resolve ghcr.io/astral-sh/uv:latest
+#6 resolve ghcr.io/astral-sh/uv:latest 0.5s done
+#6 DONE 0.5s
+
+#4 [internal] load build context
+#4 transferring context: 3.27MB 0.9s done
+#4 DONE 1.0s
+
+#7 [stage-0 7/8] COPY . .
+#7 CACHED
+
+#8 [stage-0 2/8] WORKDIR /app
+#8 CACHED
+
+#9 [stage-0 3/8] RUN apt-get update && apt-get install -y     postgresql-client     && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [stage-0 4/8] COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+#10 CACHED
+
+#11 [stage-0 5/8] COPY pyproject.toml uv.lock ./
+#11 CACHED
+
+#12 [stage-0 6/8] RUN uv pip install --system -e .
+#12 CACHED
+
+#13 [stage-0 8/8] RUN python journal_sentiment_analysis.py
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers done
+#14 writing image sha256:eb8963cbec20e5eb4ebc1383faa6a9f567eb900945adfc465e580aee94dd8a00 done
+#14 naming to docker.io/library/trace-backend done
+#14 DONE 0.0s
