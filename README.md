@@ -2,6 +2,8 @@
 
 A full-stack journaling companion built with LangChain, FastAPI, and React.
 
+DESIGN DOC: https://github.com/vaishnavi-rama-ai/Trace/blob/main/Design_Doc.md 
+
 ## Project Structure
 
 ```
