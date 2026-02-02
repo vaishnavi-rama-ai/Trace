@@ -4,6 +4,7 @@ import { Box, Container, Paper, Typography, IconButton } from '@mui/material';
 import { MessageCircle, Flame, MapPin, LogOut } from 'lucide-react';
 import TraceLogo from '../components/TraceLogo';
 import HomeActionCard from '../components/HomeActionCard';
+import traceMoodImage from '../assets/trace-mood.jpeg';
 import { COMMON_TYPOGRAPHY, COMMON_CONTAINER_STYLES } from '../theme/commonStyles';
 
 const HomeScreen = ({ onLogout, onNavigateToChat, onNavigateToBurn, onNavigateToAnalysis }) => {
@@ -59,12 +60,16 @@ const HomeScreen = ({ onLogout, onNavigateToChat, onNavigateToBurn, onNavigateTo
             bgcolor: '#E8E3D8',
           }}
         >
-          <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
-            <MapPin size={48} color="#FA582D" />
-            <Typography variant="body1" sx={{ mt: 2, color: 'text.primary' }}>
-              Map will appear here
-            </Typography>
-          </Box>
+          <Box
+            component="img"
+            src={traceMoodImage}
+            alt="Trace Mood Map"
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
         </Paper>
 
         {/* Action Cards */}
